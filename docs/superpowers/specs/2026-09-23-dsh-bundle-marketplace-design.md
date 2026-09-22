@@ -49,7 +49,7 @@
 - `exports["./package.json"]`: `./package.json`
 - `dsh.bundle.patch`: `./cordis.patch.yml`
 - `dsh.client.platform`: `web`
-- `dsh.client.inject`: `["slots", "workspaces"]`
+- `dsh.client.inject`: `["@deepseek-ai/dsh-client-ui-layout", "@deepseek-ai/dsh-client-ui-sidebar", "@deepseek-ai/dsh-client-ui-workspace"]`。这里声明的是需要预加载的客户端包，不是 Client 导出的 Cordis 服务名。
 - `ws` 从 `devDependencies` 移到 `dependencies`，因为 Host 在运行时导入它。
 - `files` 只包含根入口、Host 源码、UI bundle、patch、README、LICENSE、SECURITY 和必要文档；测试、截图源文件和开发台账不进入安装包。
 
@@ -84,7 +84,7 @@ dsh plugin --profile web add github:simplifyOurLife/dsh-spring-boot-launcher
 1. 根 manifest 具有正确的 `dsh.bundle`、`dsh.client`、exports、版本和运行时依赖。
 2. `cordis.patch.yml` 只插入 `spring-boot-launcher`，名称与根包一致。
 3. 根 Host 入口可导入，并导出 `name`、`inject`、`apply`。
-4. UI bundle 注册 ID 等于根包名，且导出的 `inject` 仍包含 `slots` 与 `workspaces`。
+4. UI bundle 注册 ID 等于根包名；manifest 预加载 layout/sidebar/workspace 客户端包，而 Client 导出的 Cordis `inject` 仍包含 `slots` 与 `workspaces`。
 5. `npm pack --dry-run --json` 的文件清单包含所有入口，不包含测试和本地配置。
 6. 现有 Host 19 个套件和 UI 2 个套件继续通过。
 7. 从 DSH web profile 解析根包时，Host 与 Client 都能被发现；最终由用户完整重启 DSH 做界面验收。
