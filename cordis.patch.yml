@@ -1,0 +1,3 @@
+- insert:
+    - id: spring-boot-launcher
+      name: dsh-spring-boot-launcher

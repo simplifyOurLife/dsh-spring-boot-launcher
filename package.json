@@ -1,11 +1,35 @@
 {
-  "name": "dsh-spring-boot-launcher-workspace",
-  "private": true,
+  "name": "dsh-spring-boot-launcher",
+  "version": "0.1.0",
   "license": "Apache-2.0",
   "type": "module",
-  "engines": { "node": ">=22.15.0" },
-  "scripts": {
-    "test": "node dsh-spring-boot-launcher/tests/run-all.mjs && node dsh-spring-boot-launcher-ui/tests/run-all.mjs"
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./dsh-spring-boot-launcher-ui/lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
   },
-  "devDependencies": { "ws": "8.21.3" }
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "scripts": {
+    "test": "node tests/run-all.mjs && node dsh-spring-boot-launcher/tests/run-all.mjs && node dsh-spring-boot-launcher-ui/tests/run-all.mjs"
+  },
+  "dependencies": {
+    "ws": "8.21.3"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-workspace"
+      ]
+    }
+  }
 }
