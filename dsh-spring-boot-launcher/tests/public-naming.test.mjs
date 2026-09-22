@@ -1,4 +1,4 @@
-// 公共命名契约：防止首次开源前仍暴露通用后端启动器标识。
+// 公共命名契约：防止首次开源前仍暴露已经废弃的旧定位标识。
 import assert from 'node:assert/strict';
 import { apply, name } from '../src/index.js';
 import { CONTROL_PATH } from '../src/control-transport.js';

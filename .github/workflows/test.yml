@@ -1,0 +1,26 @@
+name: Windows 回归测试
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.2'
+          cache: npm
+      - name: 安装锁定的测试依赖（不运行安装脚本）
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: 运行 Host 与 UI 测试（不运行 Java 或前端构建）
+        run: npm test
+      - name: 检查锁定依赖的高危漏洞
+        run: npm audit --audit-level=high --registry=https://registry.npmjs.org
