@@ -121,6 +121,7 @@ const context = {
 context.window.window = context.window;
 vm.runInNewContext(readFileSync(clientPath, "utf8"), context, { filename: clientPath });
 assert.ok(loaderEntry, "客户端模块应注册到 ModuleLoader");
+assert.equal(loaderEntry.id, "dsh-spring-boot-launcher");
 
 const clientModule = loaderEntry.factory((name) => {
   if (name === "react") return React;
