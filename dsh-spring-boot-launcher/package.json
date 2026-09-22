@@ -1,0 +1,14 @@
+{
+  "name": "dsh-spring-boot-launcher",
+  "version": "0.0.1-spike",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node tests/run-all.mjs"
+  }
+}

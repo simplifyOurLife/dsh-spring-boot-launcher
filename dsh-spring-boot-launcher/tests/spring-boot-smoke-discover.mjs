@@ -19,7 +19,7 @@ plugin.apply(ctx);
 await new Promise((r) => setTimeout(r, 600));
 
 // 2. Fixture: workspace root with an independent single project + a multi-module parent
-const FIX = mkdtempSync(join(tmpdir(), "dsh-bl-fixture-ws-"));
+const FIX = mkdtempSync(join(tmpdir(), "dsh-spring-boot-fixture-ws-"));
 // single project
 mkdirSync(join(FIX, "solo", "src", "main", "java", "demo"), { recursive: true });
 writeFileSync(join(FIX, "solo", "pom.xml"), "<project><artifactId>solo</artifactId></project>");

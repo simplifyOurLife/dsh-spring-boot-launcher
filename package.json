@@ -1,0 +1,11 @@
+{
+  "name": "dsh-spring-boot-launcher-workspace",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": { "node": ">=22.15.0" },
+  "scripts": {
+    "test": "node dsh-spring-boot-launcher/tests/run-all.mjs && node dsh-spring-boot-launcher-ui/tests/run-all.mjs"
+  },
+  "devDependencies": { "ws": "8.21.3" }
+}
