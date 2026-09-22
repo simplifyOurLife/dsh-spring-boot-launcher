@@ -8,6 +8,7 @@ logs/
 !.env.example
 .DS_Store
 Thumbs.db
+.idea/
 
 # 内部复盘、真实工程截图和临时诊断：保留本地，不进入公开仓库。
 # 若将来需要公开，请先脱敏并逐项解除忽略。
