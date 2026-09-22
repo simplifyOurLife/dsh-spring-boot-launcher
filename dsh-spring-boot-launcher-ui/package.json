@@ -12,11 +12,5 @@
   },
   "scripts": {
     "test": "node tests/run-all.mjs"
-  },
-  "dsh": {
-    "client": {
-      "inject": ["slots"],
-      "platform": "web"
-    }
   }
 }

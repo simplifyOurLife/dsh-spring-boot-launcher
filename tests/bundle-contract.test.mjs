@@ -24,6 +24,12 @@ assert.deepEqual(pkg.dsh.client, {
 assert.equal(pkg.dependencies.ws, '8.21.3');
 assert.equal(pkg.devDependencies?.ws, undefined);
 
+const uiPkg = JSON.parse(await readFile(
+  new URL('dsh-spring-boot-launcher-ui/package.json', root),
+  'utf8',
+));
+assert.equal(uiPkg.dsh, undefined);
+
 const patch = await readFile(new URL('cordis.patch.yml', root), 'utf8');
 assert.match(patch, /id:\s*spring-boot-launcher/);
 assert.match(patch, /name:\s*dsh-spring-boot-launcher/);
