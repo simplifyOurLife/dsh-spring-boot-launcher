@@ -11,7 +11,7 @@ mkdirSync(join(MOCK_JDK, "bin"), { recursive: true });
 writeFileSync(join(MOCK_JDK, "bin", "java.exe"), "mock");
 process.env.JAVA_HOME = MOCK_JDK;
 
-const FIX = join(process.env.TEMP, "dsh-bl-fixture-race");
+const FIX = join(process.env.TEMP, "dsh-spring-boot-fixture-race");
 rmSync(FIX, { recursive: true, force: true });
 mkdirSync(join(FIX, "src", "main", "java", "demo"), { recursive: true });
 writeFileSync(join(FIX, "pom.xml"), `<project>

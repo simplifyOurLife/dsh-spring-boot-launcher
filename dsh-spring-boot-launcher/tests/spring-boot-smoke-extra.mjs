@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { pathToFileURL, fileURLToPath } from "node:url";
 import assert from "node:assert";
 
-const FIX = join(process.env.TEMP, "dsh-bl-fixture2");
+const FIX = join(process.env.TEMP, "dsh-spring-boot-fixture2");
 const MOCK_JDK = join(process.env.TEMP, "jdk-mock");
 rmSync(FIX, { recursive: true, force: true });
 mkdirSync(join(MOCK_JDK, "bin"), { recursive: true });

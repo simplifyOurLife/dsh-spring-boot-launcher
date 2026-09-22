@@ -20,7 +20,7 @@ process.env.JAVA_HOME = MOCK_JDK;
 // (internalDepsMissingInM2 probes <USERPROFILE>/.m2/repository — the real one
 // never contains the fixture artifactIds, so no override needed.)
 
-const ROOT = join(process.env.TEMP, "dsh-bl-fixture-wsres");
+const ROOT = join(process.env.TEMP, "dsh-spring-boot-fixture-wsres");
 rmSync(ROOT, { recursive: true, force: true });
 
 // root pom (example-parent shape)
@@ -100,7 +100,7 @@ assert.ok(insp.matched, "matched");
 assert.deepStrictEqual(insp.internalDeps, ["common"], "internal dep detected: " + JSON.stringify(insp.internalDeps));
 assert.deepStrictEqual(insp.internalDepsMissingInM2, ["common"], "missing in m2");
 assert.strictEqual(insp.internalDepsResolvableByWorkspace, true, "workspace-resolvable");
-assert.ok(insp.reactorRoot && insp.reactorRoot.endsWith("dsh-bl-fixture-wsres"), "reactor root found");
+assert.ok(insp.reactorRoot && insp.reactorRoot.endsWith("dsh-spring-boot-fixture-wsres"), "reactor root found");
 console.log("✓ inspect:", JSON.stringify({
   internalDeps: insp.internalDeps, missingInM2: insp.internalDepsMissingInM2,
   resolvable: insp.internalDepsResolvableByWorkspace,

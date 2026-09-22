@@ -8,12 +8,12 @@ import { spawnSync } from "node:child_process";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const suites = readdirSync(here)
-  .filter((f) => (f.startsWith("dsh-bl-smoke-") || f.endsWith('.test.mjs')) && f.endsWith(".mjs"))
+  .filter((f) => (f.startsWith("spring-boot-smoke-") || f.endsWith('.test.mjs')) && f.endsWith(".mjs"))
   .sort();
 
 let failed = 0;
 for (const suite of suites) {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), 'dsh-suite-'));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'dsh-spring-boot-suite-'));
   const env = { ...process.env, TEMP: fixtureRoot, TMP: fixtureRoot, DSH_HOME: join(fixtureRoot, 'no-dsh-install') };
   console.log(`\n━━━ ${suite}`);
   const r = spawnSync(process.execPath, ['--import', pathToFileURL(join(here, 'support/register.mjs')).href, join(here, suite)], {

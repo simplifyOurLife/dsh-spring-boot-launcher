@@ -13,7 +13,7 @@ mkdirSync(join(MOCK_JDK, "bin"), { recursive: true });
 writeFileSync(join(MOCK_JDK, "bin", "java.exe"), "mock");
 process.env.JAVA_HOME = MOCK_JDK;
 
-const FIX = join(process.env.TEMP, "dsh-bl-fixture-stalelib");
+const FIX = join(process.env.TEMP, "dsh-spring-boot-fixture-stalelib");
 rmSync(FIX, { recursive: true, force: true });
 
 // reactor root → svc (spring app) + libmod (plain lib, no main)
@@ -67,7 +67,7 @@ const byName = Object.fromEntries(registered.map((t) => [t.name, t]));
 
 // 1. inspect confirms the workspace facts
 const insp = await byName.spring_boot_inspect.execute({ dir: svc }, {});
-assert.ok(insp.reactorRoot && insp.reactorRoot.endsWith("dsh-bl-fixture-stalelib"), "reactor root found");
+assert.ok(insp.reactorRoot && insp.reactorRoot.endsWith("dsh-spring-boot-fixture-stalelib"), "reactor root found");
 
 // 2. auto start: dies on missing class → degrade to reactor rebuild → 2nd proc runs
 const h = await byName.spring_boot_start.execute({ dir: svc, detach: true }, { signal: {} });
