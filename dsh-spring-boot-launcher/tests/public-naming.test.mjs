@@ -24,6 +24,11 @@ assert.deepEqual(toolNames, [
 ]);
 assert.ok(registered.every((definition) => /Spring Boot/.test(definition.description)));
 
+const start = registered.find((definition) => definition.name === 'spring_boot_start');
+for (const managementTool of ['spring_boot_status', 'spring_boot_logs', 'spring_boot_stop']) {
+  assert.match(start.description, new RegExp(`\\b${managementTool}\\b`));
+}
+
 const status = registered.find((definition) => definition.name === 'spring_boot_status');
 assert.deepEqual(await status.execute({}), { services: [] });
 

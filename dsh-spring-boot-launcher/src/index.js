@@ -2407,7 +2407,7 @@ function apply(ctx) {
         "layouts (target/*/lib); src/main/resources joins the classpath when " +
         "target/classes holds a partial config copy. modeReasons always explains " +
         "the choice. Returns {projectKey, pid, port, health, healthy, cmd, mode, logPath}. " +
-        "Use spring_boot_status/logs/stop to manage.",
+        "Use spring_boot_status, spring_boot_logs, and spring_boot_stop to manage.",
       parameters: {
         dir: {
           type: "string",

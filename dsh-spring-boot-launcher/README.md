@@ -83,4 +83,3 @@ npm test
 自动测试不会执行 Java 或前端 build。真实环境仍需验证 DSH 重启、项目扫描、Profile 选择、启动、日志和停止流程。
 
 架构说明见 [DESIGN.md](DESIGN.md)，贡献方式见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
