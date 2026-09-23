@@ -564,6 +564,7 @@ window.__ModuleLoader__.load({
 				".blv3-matchnav{display:flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10.5px;color:var(--text-2)}",
 				".blv3-navbtn{background:var(--bg-card);color:var(--text-2);border:1px solid var(--line);border-radius:4px;font-size:10px;padding:2px 7px;cursor:pointer}",
 				".blv3-navbtn:hover{color:var(--text-1);background:var(--bg-hover)}",
+				".blv3-tailbtn{flex-shrink:0;white-space:nowrap;padding:4px 8px}",
 				".blv3-logview{flex:1;overflow-y:auto;background:var(--bg-inset);padding:12px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-all;margin:0}",
 				".blv3-logview .lv-ts{color:color-mix(in srgb,var(--text-2) 55%,transparent)}",
 				".blv3-logview .lv-info{color:color-mix(in srgb,var(--text-2) 70%,var(--accent));font-weight:600}",
@@ -1183,11 +1184,6 @@ window.__ModuleLoader__.load({
 				}
 			}, [search]);
 
-			// Auto-scroll log pane to bottom on new content.
-			useEffect(function () {
-				if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
-			});
-
 			if (!panelOpen) { injectStyles(); return null; }
 			injectStyles();
 
@@ -1303,7 +1299,16 @@ window.__ModuleLoader__.load({
 											createElement("button", { className: "blv3-navbtn", onClick: function () { gotoMatch(true); }, title: "下一处" }, "↓"))
 										: search.trim()
 											? createElement("span", { className: "blv3-matchnav" }, "0 处")
-											: null)),
+											: null),
+								createElement("button", {
+									className: "blv3-navbtn blv3-tailbtn",
+									title: "滚动到日志末尾",
+									disabled: !selKey,
+									onClick: function () {
+										// 只响应明确的用户操作，不与搜索定位或手动滚动争夺位置。
+										if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+									},
+								}, "↓ 末尾")),
 							createElement("pre", {
 								ref: logRef,
 								className: "blv3-logview",
