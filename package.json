@@ -31,5 +31,14 @@
         "@deepseek-ai/dsh-client-ui-workspace"
       ]
     }
-  }
+  },
+  "files": [
+    "src",
+    "dsh-spring-boot-launcher/src",
+    "dsh-spring-boot-launcher-ui/lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ]
 }
