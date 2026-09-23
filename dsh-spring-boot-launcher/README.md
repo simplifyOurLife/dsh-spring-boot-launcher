@@ -14,31 +14,34 @@ DSH Spring Boot Launcher 为 DeepSeek Harness 提供 Maven Spring Boot 项目检
 
 ## 安装与加载
 
-在仓库根目录执行以下 PowerShell 命令，把两个包以 Junction 方式连接到 DSH profile：
+面向用户的安装方式：
+
+```powershell
+dsh plugin --profile web add github:simplifyOurLife/dsh-spring-boot-launcher
+```
+
+完整重启 DSH 并刷新已登录页面。侧栏出现 **Spring Boot** 后即可打开管理面板。已有 Agent 会话可能保留旧工具快照；若工具未出现，请新建会话。
+
+### 源码开发方式
+
+在仓库根目录执行以下 PowerShell 命令，只把根 bundle 连接到 DSH profile：
 
 ```powershell
 $dshModules = Join-Path $env:USERPROFILE ".dsh\profiles\node_modules"
-
 New-Item -ItemType Directory -Force -Path $dshModules | Out-Null
-New-Item -ItemType Junction `
-  -Path (Join-Path $dshModules "dsh-spring-boot-launcher") `
-  -Target (Resolve-Path ".\dsh-spring-boot-launcher")
-New-Item -ItemType Junction `
-  -Path (Join-Path $dshModules "dsh-spring-boot-launcher-ui") `
-  -Target (Resolve-Path ".\dsh-spring-boot-launcher-ui")
+New-Item -ItemType Junction -Path (Join-Path $dshModules "dsh-spring-boot-launcher") -Target (Resolve-Path ".")
 ```
 
 如果目标 Junction 已存在，请先确认其目标，不要覆盖未知目录。
 
-在目标 profile 的 `cordis.patch.yml` 中加载两个包：
+在目标 profile 的 `cordis.patch.yml` 中加载根 bundle：
 
 ```yaml
 - insert:
     - { id: spring-boot-launcher, name: dsh-spring-boot-launcher }
-    - { id: spring-boot-launcher-ui, name: dsh-spring-boot-launcher-ui }
 ```
 
-完整重启 DSH 并刷新已登录页面。侧栏出现 **Spring Boot** 后即可打开管理面板。已有 Agent 会话可能保留旧工具快照；若工具未出现，请新建会话。
+开发联接也需要完整重启 DSH。根包通过 `src/index.js` 提供 Host，通过 `./client` 导出 Web 面板；不要再为 UI 添加独立 Loader 条目。
 
 ## Agent 工具
 

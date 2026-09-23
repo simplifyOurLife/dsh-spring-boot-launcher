@@ -15,7 +15,7 @@
 
 DSH Spring Boot Launcher 是面向 Maven Spring Boot 项目的专用启动器。它提供 Agent 工具和 Web 管理面板，用同一套进程管理逻辑完成项目检查、Profile 选择、启停、状态查询和日志查看。
 
-> 当前版本为 `0.0.1-spike` / Alpha，尚未发布 npm 公共包，也不承诺稳定 API。真实项目启停和日志能力已在 Windows 11、PowerShell 7 环境验证。
+> 当前版本为 `0.1.0` / Alpha，支持从 GitHub 安装，尚未发布 npm 公共包，也不承诺稳定 API。真实项目启停和日志能力已在 Windows 11、PowerShell 7 环境验证。
 
 ![Spring Boot Services 服务面板](docs/images/spring-boot-services-panel.png)
 
@@ -44,14 +44,22 @@ DSH Spring Boot Launcher 是面向 Maven Spring Boot 项目的专用启动器。
 
 ## 快速开始
 
-仓库包含两个需要同时加载的包：
+在已安装 DSH CLI 的环境中执行：
+
+```powershell
+dsh plugin --profile web add github:simplifyOurLife/dsh-spring-boot-launcher
+```
+
+完整重启 DSH，再刷新已登录的本机页面。已有 Agent 会话可能保留旧工具列表；如未看到 `spring_boot_*` 工具，请新建会话。
+
+仓库只发行一个 `dsh-spring-boot-launcher` bundle；下面两个目录是内部实现：
 
 ```text
 dsh-spring-boot-launcher/       Host：项目检查、启动决策、进程与日志
 dsh-spring-boot-launcher-ui/    Client：Spring Boot Services 管理面板
 ```
 
-详细的 Junction 创建命令和 DSH 加载配置见 [插件使用说明](dsh-spring-boot-launcher/README.md#安装与加载)。完成配置后需要完整重启 DSH，再刷新已登录的本机页面。
+源码开发所需的单一 Junction 和 DSH 加载配置见 [插件使用说明](dsh-spring-boot-launcher/README.md#源码开发方式)。
 
 侧栏出现 **Spring Boot** 后，可以在面板中扫描工作区、选择 Profile 并启动服务，也可以让 Agent 调用以下工具：
 
@@ -108,7 +116,7 @@ npm test
 - 端口占用只能说明存在监听进程，不能证明它属于当前项目。
 - 跨 DSH 会话的进程恢复、复杂 Maven 属性继承和更多配置格式仍需完善。
 - Gradle 与 Linux/macOS 尚未进入当前支持范围。
-- 现阶段仅分发源码，两个包仍标记为 `private`。
+- 现阶段通过 GitHub 源码安装根 bundle，尚未发布 npm 公共包。
 
 ## 参与贡献
 
