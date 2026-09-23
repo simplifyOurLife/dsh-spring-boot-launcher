@@ -6,6 +6,8 @@
 
 ## 组件
 
+仓库根目录是唯一公开的 DSH bundle。根 `src/index.js` 代理导出本目录的 Host，根 manifest 的 `dsh.client` 和 `./client` 导出指向内部 UI bundle。客户端注册 ID 与根包名同为 dsh-spring-boot-launcher；profile 只需一个 spring-boot-launcher Loader 条目。
+
 ```text
 dsh-spring-boot-launcher/
   src/index.js              插件入口、项目检查、进程注册表和五个 Agent 工具

@@ -20,6 +20,8 @@
 - 保持 Maven Spring Boot 专用定位，不新增未验证的平台或构建工具承诺。
 - 新行为和缺陷修复应先增加能失败的回归测试。
 - Host 与 UI 的协议字段、路由和 service marker 必须同步修改。
+- 根 `src/index.js`、`package.json`、`cordis.patch.yml` 构成唯一公开 bundle；不要把内部 Host/UI 重新拆成两个公开 Loader 条目。
+- 修改安装入口或 UI 模块身份时，保持客户端注册 ID 为 `dsh-spring-boot-launcher`，并运行根 bundle 契约及发行文件清单测试。
 - 注释和关键错误信息优先使用中文，代码标识遵循现有英文命名。
 - 不引入与需求无关的依赖或重构。
 
