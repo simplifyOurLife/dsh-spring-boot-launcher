@@ -8,7 +8,7 @@
 //   spring_boot_stop     — kill the process
 //
 // Process management uses ctx.shell (the DSH-blessed seam), NOT raw
-// child_process. ctx.shell.start() gives a ShellProcess with readOutput()
+// child_process. 新版 ctx.shell.execute()（旧版 start）提供 readOutput()
 // incremental reads + kill(), and respects sandbox policy.
 //
 // The GUI panel (dsh-spring-boot-launcher-ui) talks to the ControlServer below.
@@ -30,12 +30,14 @@ import {openLogFile, closeLog, appendLog} from './log-storage.js';
 import { readBody } from './control-body.js';
 import { mountControlTransport } from './control-transport.js';
 import { detectJdkCandidates } from './jdk-discovery.js';
+import { runShell, startShell } from './shell-execution.js';
 
 import { defineTool, WebSocketServer } from './host-dependencies.js';
 
 // Spring Boot processes must write (mvn → target/, JVM → logs/, ~/.m2 cache), so
 // they cannot run under the deployment-default sandbox policy: a host-level
-// ctx.shell.start without an explicit policy resolves to the deployment
+// ctx.shell 执行时若没有明确策略，会使用部署默认值。
+// A request without an explicit policy resolves to the deployment
 // default, which on this setup confined the process read-only — mvn's
 // copy-resources and logback's RollingFileAppender both died with 拒绝访问
 // while the identical command run manually succeeded. The launcher's whole
@@ -1183,12 +1185,12 @@ function collectSpringProfiles(dir) {
 async function probeJdkVersion(ctx, exec, jdkPath) {
   if (!ctx.shell) return undefined;
   try {
-    const res = await ctx.shell.run(ctx.shell.resolve({
+    const res = await runShell(ctx.shell, {
       command: `& '${join(jdkPath, "bin", "java.exe").replace(/'/g, "''")}' -version`,
       workdir: jdkPath,
       timeoutMs: 8000,
       signal: exec?.signal,
-    }));
+    });
     if (res.timedOut || res.aborted || (res.exitCode !== undefined && res.exitCode !== 0)) {
       console.warn('[spring-boot-launcher] JDK 版本探测未成功退出:', jdkPath, res.exitCode);
       return undefined;
@@ -1965,12 +1967,12 @@ async function doStart(ctx, exec, args, dir, key) {
   // logs/logback.*.log before the app even boots.
   let shellProc;
   try {
-    shellProc = ctx.shell.start(ctx.shell.resolve({
+    shellProc = await startShell(ctx.shell, {
       command: cmd,
       workdir: dir,
       env,
       sandboxPolicy: FULL_ACCESS_POLICY,
-    }));
+    });
   } catch (e) {
     return {
       isError: true,
@@ -2080,12 +2082,12 @@ async function doStart(ctx, exec, args, dir, key) {
             }
             const newCmd = wrapForPwshExec(degradedLaunch.innerCmd);
             try {
-              const newShellProc = ctx.shell.start(ctx.shell.resolve({
+              const newShellProc = await startShell(ctx.shell, {
                 command: newCmd,
                 workdir: dir,
                 env,
                 sandboxPolicy: FULL_ACCESS_POLICY,
-              }));
+              });
               // Swap the entry's process + handle, keep the log buffer and
               // the open log file fd (same project, append continues).
               entry.shellProcess = newShellProc;
@@ -2170,6 +2172,9 @@ async function doStart(ctx, exec, args, dir, key) {
   // degrade and the honest error apply ONLY to a non-running process; a live
   // process must fall through to the normal finalHandle below.
   if (shellProc.status !== "running" && !healthy) {
+    // 新版 done 与日志排空都是异步的；诊断必须在尾部输出收齐后决定。
+    // 否则立即退出的缺类错误会被漏判，无法进入已有的降级重试路径。
+    await entry.pump;
     const diedOnMissingClass =
       /NoClassDefFoundError|ClassNotFoundException/.test(entry.logBuffer);
     if ((mode === "direct-classpath" || mode === "jar-run") &&
@@ -2184,9 +2189,9 @@ async function doStart(ctx, exec, args, dir, key) {
       if (!rebuiltLaunch.error) {
         const newCmd = wrapForPwshExec(rebuiltLaunch.innerCmd);
         try {
-          const rebuiltProc = ctx.shell.start(ctx.shell.resolve({
+          const rebuiltProc = await startShell(ctx.shell, {
             command: newCmd, workdir: dir, env, sandboxPolicy: FULL_ACCESS_POLICY,
-          }));
+          });
           entry.shellProcess = rebuiltProc;
           entry.handle = { ...handle, mode: "dev-run-classpath (rebuilt stale lib)", cmd: newCmd, health: "retrying" };
           entry.modeReasons = [
@@ -2275,15 +2280,18 @@ async function stopSpringBootCore(ctx, dirOrKey) {
     };
     if (pid && ctx?.shell) {
       try {
-        await ctx.shell.run(ctx.shell.resolve({
+        await runShell(ctx.shell, {
           command: `cmd.exe /c "taskkill /T /PID ${pid}"`,
           timeoutMs: 10000,
           sandboxPolicy: FULL_ACCESS_POLICY,
-        }));
+        });
       } catch {
         /* graceful signal failed — force path below */
       }
     } else {
+      // 新版公共句柄不暴露 PID，只停止我们保存的宿主句柄。
+      // 不按端口猜测 PID，也不尝试终止未确认归属的进程。
+      console.info('[spring-boot-launcher] 宿主未公开 PID，使用托管句柄停止服务:', key);
       entry.shellProcess.kill();
     }
     // Grace window: give shutdown hooks time to emit their logs while the
@@ -2293,11 +2301,11 @@ async function stopSpringBootCore(ctx, dirOrKey) {
       entry.shellProcess.kill();
       if (pid && ctx?.shell) {
         try {
-          await ctx.shell.run(ctx.shell.resolve({
+          await runShell(ctx.shell, {
             command: `cmd.exe /c "taskkill /F /T /PID ${pid}"`,
             timeoutMs: 10000,
             sandboxPolicy: FULL_ACCESS_POLICY,
-          }));
+          });
         } catch {
           /* best-effort; the direct kill above already ran */
         }

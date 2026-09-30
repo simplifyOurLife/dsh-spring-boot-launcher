@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import vm from 'node:vm';
+import { runShell } from '../src/shell-execution.js';
 const source = readFileSync(new URL('../src/index.js', import.meta.url), 'utf8');
 const start = source.indexOf('async function probeJdkVersion(');
 const end = source.indexOf('\n/**', start);
 const warnings = [];
-const probe = vm.runInNewContext(source.slice(start, end) + '; probeJdkVersion', { join, console: { warn: (...args) => warnings.push(args) } });
+const probe = vm.runInNewContext(source.slice(start, end) + '; probeJdkVersion', { join, runShell, console: { warn: (...args) => warnings.push(args) } });
 const shell = {
   resolve: (spec) => spec,
   run: async () => ({ exitCode: 0, stdout: { text: '' }, stderr: { text: 'java version "1.8.0_421"\nJava(TM) SE Runtime Environment' } }),
