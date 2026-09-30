@@ -1,4 +1,4 @@
-// 回归：日志新增和搜索导航重渲染不能抢走用户的滚动位置；只有显式按钮跳到底部。
+// 回归：默认不抢滚动位置；开启末尾跟随后只随新日志滚动，搜索和手动阅读会退出跟随。
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -102,12 +102,16 @@ client.apply({
 await new Promise((resolve) => setTimeout(resolve, 0));
 renderComponent(registered["sidebar.footer.action"]).props.onClick();
 assert.ok(socket, "面板应建立日志 WebSocket");
-socket.onmessage({ data: JSON.stringify({ type: "snapshot", services: { demo: { projectKey: "demo", projectDir: "D:\\demo", running: true, status: "running" } } }) });
+socket.onmessage({ data: JSON.stringify({ type: "snapshot", services: {
+  demo: { projectKey: "demo", projectDir: "D:\\demo", running: true, status: "running" },
+  other: { projectKey: "other", projectDir: "D:\\other", running: false, status: "completed" },
+} }) });
 socket.onmessage({ data: JSON.stringify({ type: "logSnapshot", projectKey: "demo", text: "needle first\nother\nneedle second" }) });
 
 const pane = {
   scrollTop: 120,
   scrollHeight: 1000,
+  clientHeight: 200,
   querySelector(selector) {
     const match = /data-m="(\d+)"/.exec(selector);
     return match ? { scrollIntoView: () => { this.scrollTop = Number(match[1]) === 0 ? 200 : 400; } } : null;
@@ -143,8 +147,67 @@ nodes = renderPanel();
 flushEffects();
 assert.equal(pane.scrollTop, 400, "定位命中后新日志不应抢走阅读位置");
 
-const tailButton = nodes.find((node) => node.type === "button" && node.props.title === "滚动到日志末尾");
-assert.ok(tailButton, "日志工具栏应提供显式滚动到末尾按钮");
-tailButton.props.onClick();
+function tailButton() {
+  return nodes.find((node) => node.type === "button" && node.props.className?.includes("blv3-tailbtn"));
+}
+assert.ok(tailButton(), "日志工具栏应提供末尾跟随开关");
+assert.equal(tailButton().props["aria-pressed"], false, "默认不自动跟随日志");
+tailButton().props.onClick();
 assert.equal(pane.scrollTop, pane.scrollHeight, "点击按钮后应滚动到日志末尾");
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], true, "开启跟随后按钮应高亮");
+pane.scrollHeight = 1200;
+socket.onmessage({ data: JSON.stringify({ type: "log", projectKey: "demo", delta: "\nfollowed" }) });
+nodes = renderPanel();
+flushEffects();
+assert.equal(pane.scrollTop, 1200, "跟随开启时新日志应滚动到最新位置");
+
+pane.scrollTop = 300;
+nodes.find((node) => node.type === "pre" && node.props.className === "blv3-logview")
+  .props.onScroll({ currentTarget: pane });
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], false, "用户向上滚动应退出跟随");
+pane.scrollHeight = 1400;
+socket.onmessage({ data: JSON.stringify({ type: "log", projectKey: "demo", delta: "\nmanual reading" }) });
+nodes = renderPanel();
+flushEffects();
+assert.equal(pane.scrollTop, 300, "退出跟随后新日志不得抢走阅读位置");
+
+tailButton().props.onClick();
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], true, "可再次开启跟随");
+input = nodes.find((node) => node.type === "input" && node.props.className === "blv3-search");
+input.props.onChange({ target: { value: "other" } });
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], false, "输入搜索词应立即退出跟随");
+input = nodes.find((node) => node.type === "input" && node.props.className === "blv3-search");
+input.props.onKeyDown({ key: "Enter" });
+nodes = renderPanel();
+flushEffects();
+assert.equal(pane.scrollTop, 200, "搜索应定位命中，不被末尾跟随覆盖");
+
+tailButton().props.onClick();
+nodes = renderPanel();
+flushEffects();
+tailButton().props.onClick();
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], false, "再次点击应关闭跟随");
+
+tailButton().props.onClick();
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], true, "切换服务前先开启跟随");
+nodes.filter((node) => node.type === "div" && node.props.className?.includes("blv3-svcrow"))[1].props.onClick();
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], false, "切到另一服务后应退出跟随");
+nodes.filter((node) => node.type === "div" && node.props.className?.includes("blv3-svcrow"))[0].props.onClick();
+nodes = renderPanel();
+flushEffects();
+assert.equal(tailButton().props["aria-pressed"], false, "切回原服务也不能偷偷恢复跟随");
 console.log("UI LOG SCROLL SMOKE TESTS PASSED");

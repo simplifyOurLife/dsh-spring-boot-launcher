@@ -15,7 +15,7 @@
 
 DSH Spring Boot Launcher 是面向 Maven Spring Boot 项目的专用启动器。它提供 Agent 工具和 Web 管理面板，用同一套进程管理逻辑完成项目检查、Profile 选择、启停、状态查询和日志查看。
 
-> 当前版本为 `0.1.1` / Alpha，支持从 GitHub 安装，尚未发布 npm 公共包，也不承诺稳定 API。真实项目启停和日志能力已在 Windows 11、PowerShell 7 环境验证；官方 DSH 桌面版的连接适配已加入，仍需真实工程端到端验收。
+> 当前版本为 `0.1.2` / Alpha，支持从 GitHub 安装，尚未发布 npm 公共包，也不承诺稳定 API。真实项目启停和日志能力已在 Windows 11、PowerShell 7 环境验证；官方 DSH 桌面版的连接适配已加入，仍需真实工程端到端验收。
 
 ![Spring Boot Services 服务面板](docs/images/spring-boot-services-panel.png)
 
@@ -70,6 +70,10 @@ dsh-spring-boot-launcher-ui/    Client：Spring Boot Services 管理面板
 源码开发所需的单一 Junction 和 DSH 加载配置见 [插件使用说明](dsh-spring-boot-launcher/README.md#源码开发方式)。
 
 侧栏出现 **Spring Boot** 后，可以在面板中扫描工作区、选择 Profile 并启动服务，也可以让 Agent 调用以下工具：
+
+在 DSH 插件列表中，本插件显示为 **Spring Boot 启动器**。打开插件详情，可以查看用途、主要能力、环境要求和日志说明，并通过 **打开服务管理面板** 按钮进入现有服务面板。详情卡片使用 DSH 的 `plugins.bundle.config` 插槽；未提供此插槽的旧宿主仍可使用侧栏入口。
+
+日志工具栏的 **↓ 末尾** 是跟随开关，默认关闭。点击后按钮高亮并持续滚动到最新日志；再次点击、搜索日志、向上滚动阅读或切换服务会关闭跟随。关闭跟随只停止自动滚动，不停止接收日志。更新插件后请重启 DSH Host / Web 服务或桌面应用，让 Host 与面板同时加载新代码。
 
 | 工具 | 用途 |
 | --- | --- |

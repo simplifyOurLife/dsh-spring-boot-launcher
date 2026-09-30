@@ -5,13 +5,20 @@ const root = new URL('../', import.meta.url);
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 
 assert.equal(pkg.name, 'dsh-spring-boot-launcher');
-assert.equal(pkg.version, '0.1.1');
+assert.equal(pkg.version, '0.1.2');
 assert.notEqual(pkg.private, true);
 assert.equal(pkg.main, './src/index.js');
 assert.equal(pkg.exports['.'], './src/index.js');
 assert.equal(pkg.exports['./client'], './dsh-spring-boot-launcher-ui/lib/client.js');
 assert.equal(pkg.exports['./cordis.patch.yml'], './cordis.patch.yml');
 assert.equal(pkg.exports['./package.json'], './package.json');
+assert.equal(pkg.exports['./locale/*.json'], './locale/*.json');
+assert.ok(pkg.description.includes('Maven Spring Boot'));
+for (const language of ['zh', 'en']) {
+  const locale = JSON.parse(await readFile(new URL(`locale/${language}.json`, root), 'utf8'));
+  assert.equal(locale.meta.title, 'Spring Boot 启动器');
+  assert.equal(locale.meta.description, pkg.description);
+}
 assert.deepEqual(pkg.dsh.bundle, { patch: './cordis.patch.yml' });
 assert.deepEqual(pkg.dsh.client, {
   platform: 'web',

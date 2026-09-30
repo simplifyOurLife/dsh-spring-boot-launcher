@@ -110,8 +110,19 @@ const execAbort = { signal: { aborted: true } };
   assert.ok(cpAt !== -1 && delAt > cpAt, "4: shadow-del after copy-dependencies");
   assert.ok(javaAt > delAt, "4: java launch after shadow-del");
   assert.ok(cmd.includes("jsp-api-*.jar"), "4: jsp-api wildcard covered too");
+  assert.ok(cmd.includes('target\\classes;target\\lib\\*'),
+    "4: Maven 准备前依赖目录为空时，Java 仍须包含准备后生成的 target/lib");
   assert.ok(r.modeReasons.some((x) => x.includes("post-clean guard")), "4: guard noted in reasons");
   console.log("✓ post-clean: mvn copy → del shadowers → java");
+}
+
+// 全新工程尚无 target；Maven 编译后生成的主类目录也必须进入 classpath。
+{
+  const dir = makeProject('freshcompile', [], { crippled: true });
+  rmSync(join(dir, 'target'), { recursive: true, force: true });
+  const r = await byName.spring_boot_start.execute({ dir, mode: 'dev-run-classpath', detach: true }, { signal: {} });
+  assert.ok(!r.isError, JSON.stringify(r.error));
+  assert.ok(captured.at(-1).command.includes('target\\classes;target\\lib\\*'), '编译前没有 target 时也不能遗漏主类目录');
 }
 
 rmSync(FIX, { recursive: true, force: true });
