@@ -29,8 +29,16 @@ window.__ModuleLoader__.load({
 				if (r.ok === false) throw new Error("控制通道不可用：" + r.status);
 				return r.json();
 			}).then(function (j) {
-				return j && j.service === "dsh-spring-boot-launcher"
-					? Number(window.location.port || (window.location.protocol === "https:" ? 443 : 80)) : null;
+				if (!j || j.service !== "dsh-spring-boot-launcher") return null;
+				// 桌面页是 dsh-app://app，真正的已认证 Host 端口由 /status 返回。
+				if (window.location.protocol === "dsh-app:" && window.location.host === "app") {
+					var port = Number(j.port);
+					if (!Number.isInteger(port) || port < 1 || port > 65535) {
+						throw new Error("DSH 桌面版未提供有效的控制通道端口");
+					}
+					return port;
+				}
+				return Number(window.location.port || (window.location.protocol === "https:" ? 443 : 80));
 			});
 		}
 
@@ -197,7 +205,10 @@ window.__ModuleLoader__.load({
 					self.port = port;
 					var ws;
 					try {
-						ws = new WebSocket((window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host + CONTROL_PATH + "/ws");
+						var desktop = window.location.protocol === "dsh-app:" && window.location.host === "app";
+						var origin = desktop ? "ws://127.0.0.1:" + port
+							: (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host;
+						ws = new WebSocket(origin + CONTROL_PATH + "/ws");
 					} catch (e) {
 						self.scheduleReconnect();
 						return;
