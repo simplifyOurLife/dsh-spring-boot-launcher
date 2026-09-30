@@ -1,6 +1,7 @@
 {
   "name": "dsh-spring-boot-launcher",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "description": "在 DSH 中发现、启动和管理 Maven Spring Boot 服务，支持 Profile 选择、服务启停和实时日志。",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./src/index.js",
@@ -8,7 +9,8 @@
     ".": "./src/index.js",
     "./client": "./dsh-spring-boot-launcher-ui/lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
   },
   "engines": {
     "node": ">=22.15.0"
@@ -37,6 +39,7 @@
     "dsh-spring-boot-launcher/src",
     "dsh-spring-boot-launcher-ui/lib",
     "cordis.patch.yml",
+    "locale",
     "README.md",
     "LICENSE",
     "SECURITY.md"

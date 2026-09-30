@@ -8,7 +8,7 @@ const source = readFileSync(new URL('../src/index.js', import.meta.url), 'utf8')
 const start = source.indexOf('async function probeJdkVersion(');
 const end = source.indexOf('\n/**', start);
 const warnings = [];
-const probe = vm.runInNewContext(source.slice(start, end) + '; probeJdkVersion', { join, runShell, console: { warn: (...args) => warnings.push(args) } });
+const probe = vm.runInNewContext(source.slice(start, end) + '; probeJdkVersion', { join, runShell, FULL_ACCESS_POLICY: { mode: 'danger-full-access' }, console: { warn: (...args) => warnings.push(args) } });
 const shell = {
   resolve: (spec) => spec,
   run: async () => ({ exitCode: 0, stdout: { text: '' }, stderr: { text: 'java version "1.8.0_421"\nJava(TM) SE Runtime Environment' } }),
@@ -25,4 +25,19 @@ assert.equal(await probe({ shell }, null, 'D:\\fixture\\jdk8'), undefined);
 shell.run = async () => { throw new Error('模拟拒绝访问'); };
 assert.equal(await probe({ shell }, null, 'D:\\fixture\\jdk8'), undefined);
 assert.equal(warnings.length, 2, '失败应记录原因，不再静默吞掉');
+let executions = 0;
+const desktopShell = {
+  resolve: spec => ({ sandboxPolicy: { mode: 'workspace-write' }, ...spec }),
+  async execute(spec) {
+    executions++;
+    if (spec.sandboxPolicy.mode !== 'danger-full-access') throw new Error('windows-acl-run: SetNamedSecurityInfoW failed (Win32 5)');
+    assert.equal(spec.timeoutMs, 8000);
+    return { result: async () => ({ exitCode: 0, stderr: { text: 'java version "1.8.0_421"' } }) };
+  },
+};
+assert.equal(await probe({ shell: desktopShell }, null, 'D:\\fixture\\jdk8'), 'java version "1.8.0_421"', '探测必须与服务启动使用一致的显式执行策略');
+assert.equal(executions, 1, '不能先失败再静默升级权限重试');
+const diagnostic = {};
+assert.equal(await probe({ shell }, null, 'D:\\fixture\\jdk8', diagnostic), undefined);
+assert.match(diagnostic.probeError, /模拟拒绝访问/);
 console.log('真实 DSH JDK 版本输出测试通过');

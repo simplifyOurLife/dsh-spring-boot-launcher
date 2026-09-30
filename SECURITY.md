@@ -9,6 +9,7 @@
 DSH Spring Boot Launcher 负责启动用户选择的 Maven Spring Boot 工程。它不是构建脚本沙箱，也不适合执行来源不明的项目。
 
 - Host 通过 DSH `ctx.shell` 以当前用户权限运行 Maven 和 JVM，因为目标工程需要写入 `target/`、`logs/` 与本地 Maven 仓库。
+- JDK 版本探测仅执行 `java -version`，显式使用与服务启动相同的 `danger-full-access` 策略，避免继承不可用的 Windows ACL 沙箱。此策略不修改 DSH 全局配置；只应检查和运行来源可信的 JDK 与工程。
 - HTTP / WebSocket 挂载在 DSH 的 `/spring-boot-launcher` 同源路径，每个请求和 WS 握手都委托宿主登录校验。
 - 插件额外要求回环 Host、实际监听端口和精确 Origin，并拒绝 cross-site 请求。
 - 宿主认证接口缺失时拒绝提供控制通道，不回退到独立端口或无认证模式。

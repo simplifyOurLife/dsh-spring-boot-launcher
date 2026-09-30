@@ -728,7 +728,14 @@ function buildLaunchCommand({ mode, dir, profile, javaExe, argsJarPath, springPr
     // selected module; copy-dependencies' outputDirectory must then be
     // ABSOLUTE (relative -pl output dirs resolve against the root cwd).
     const { parts: cpParts, notes: cpNotes } = buildDirectClasspath(dir, profile);
-    const cp = cpParts.length ? cpParts.join(";") : `target\\classes;target\\lib\\*`;
+    // Maven 准备后才会刷新 target/lib；启动前扫描到的空目录或旧 jar 清单
+    // 不能决定最终 JVM 的依赖路径。保留其它模块/配置目录，始终使用通配符读取新依赖。
+    const cp = [
+      ...cpParts.filter((part) => !part.startsWith("target\\lib\\")),
+      // 首次编译前 classes 可能尚不存在，但 compile 成功后必须加载它。
+      ...(cpParts.includes("target\\classes") ? [] : ["target\\classes"]),
+      "target\\lib\\*",
+    ].join(";");
     const moduleDirs = discoverSiblingModuleDirs(dir, profile);
     const staleJars = collectStaleInternalJars(dir, moduleDirs);
     const dels = staleJars
@@ -1182,16 +1189,25 @@ function collectSpringProfiles(dir) {
 
 // ─── JDK detection ────────────────────────────────────────────────────────
 
-async function probeJdkVersion(ctx, exec, jdkPath) {
-  if (!ctx.shell) return undefined;
+async function probeJdkVersion(ctx, exec, jdkPath, diagnostic = {}) {
+  delete diagnostic.probeError;
+  if (!ctx.shell) {
+    diagnostic.probeError = '宿主未提供 Shell 执行接口';
+    return undefined;
+  }
   try {
     const res = await runShell(ctx.shell, {
       command: `& '${join(jdkPath, "bin", "java.exe").replace(/'/g, "''")}' -version`,
       workdir: jdkPath,
       timeoutMs: 8000,
       signal: exec?.signal,
+      // 与用户授权的服务启动策略一致，避免继承宿主不可用的 ACL 沙箱。
+      // 仅执行 java -version，不修改宿主全局权限，也不失败后自动升级重试。
+      sandboxPolicy: FULL_ACCESS_POLICY,
     });
     if (res.timedOut || res.aborted || (res.exitCode !== undefined && res.exitCode !== 0)) {
+      diagnostic.probeError = res.timedOut ? 'JDK 版本探测超时'
+        : res.aborted ? 'JDK 版本探测已取消' : `JDK 版本探测退出码：${res.exitCode}`;
       console.warn('[spring-boot-launcher] JDK 版本探测未成功退出:', jdkPath, res.exitCode);
       return undefined;
     }
@@ -1201,9 +1217,13 @@ async function probeJdkVersion(ctx, exec, jdkPath) {
       : typeof output?.text === 'string' ? output.text : '';
     const lines = (outputText(res.stderr) + '\n' + outputText(res.stdout)).split(/\r?\n/);
     const version = lines.map((line) => line.trim()).find((line) => /^(?:java|openjdk)\s+(?:version\s+)?"?\d+/i.test(line));
-    if (!version) console.warn('[spring-boot-launcher] JDK 探测输出没有可识别版本:', jdkPath);
+    if (!version) {
+      diagnostic.probeError = 'JDK 探测输出没有可识别版本';
+      console.warn('[spring-boot-launcher] JDK 探测输出没有可识别版本:', jdkPath);
+    }
     return version;
   } catch (error) {
+    diagnostic.probeError = String(error?.message || error).slice(0, 1200);
     console.warn('[spring-boot-launcher] JDK 版本探测失败:', jdkPath, error.message);
     return undefined;
   }
@@ -1793,11 +1813,19 @@ async function doStart(ctx, exec, args, dir, key) {
     };
   }
   for (const candidate of jdks) {
-    candidate.detectedVersion = await probeJdkVersion(ctx, exec, candidate.path);
+    candidate.detectedVersion = await probeJdkVersion(ctx, exec, candidate.path, candidate);
   }
   const jdk = selectJdk(jdks, profile.requiredJdk || '8+');
-  if (!jdk) return {isError:true, error:{code:'JDK_VERSION_MISMATCH',
-    message:`未找到符合 ${profile.requiredJdk || '8+'} 的可确认版本 JDK，请配置 JAVA_HOME。`, candidates:jdks}};
+  if (!jdk) {
+    const failedProbe = jdks.find(candidate => candidate.probeError);
+    return {isError:true, error:{
+      code: failedProbe ? 'JDK_PROBE_FAILED' : 'JDK_VERSION_MISMATCH',
+      message: failedProbe
+        ? `已找到 JDK，但无法完成版本探测：${failedProbe.probeError}`
+        : `已探测的 JDK 均不符合 ${profile.requiredJdk || '8+'}，请配置对应版本的 JAVA_HOME。`,
+      candidates: jdks,
+    }};
+  }
   try { assertSafeCommandValue(jdk.path, 'JDK 路径'); }
   catch (error) { return {isError:true, error:{code:'INVALID_ARGUMENT',message:error.message}}; }
 
@@ -2392,7 +2420,7 @@ function apply(ctx) {
         if (result.matched) {
           const jdks = detectJdkCandidates();
           for (const j of jdks) {
-            j.detectedVersion = await probeJdkVersion(ctx, exec, j.path);
+            j.detectedVersion = await probeJdkVersion(ctx, exec, j.path, j);
           }
           result.detectedJdks = jdks;
           result.projectKey = projectKey(args.dir);

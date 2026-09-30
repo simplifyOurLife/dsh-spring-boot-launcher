@@ -14,6 +14,7 @@ let launchSpec;
 let launchCount = 0;
 let killed = false;
 let tailRead = false;
+let probeFailure = false;
 const proc = {
   status: 'running', exitCode: null, signal: null,
   done: Promise.resolve(), observed: {},
@@ -33,6 +34,7 @@ const ctx = {
     resolve: spec => ({ timeoutMs: 50, onExpiry: 'kill', ...spec }),
     async execute(spec) {
       if (spec.command.includes('-version')) {
+        if (probeFailure) throw new Error('windows-acl-run: SetNamedSecurityInfoW failed (Win32 5)');
         return { result: async () => ({ exitCode: 0, stdout: { text: '' }, stderr: { text: 'openjdk version "17.0.12"' } }) };
       }
       launchSpec = spec;
@@ -57,6 +59,13 @@ try {
   apply(ctx);
   const inspect = await tools.get('spring_boot_inspect').execute({ dir }, {});
   assert.ok(inspect.detectedJdks.some(item => item.detectedVersion === 'openjdk version "17.0.12"'), '新版 result() 输出应能识别 JDK');
+  probeFailure = true;
+  const failed = await tools.get('spring_boot_start').execute({ dir, detach: true }, {});
+  assert.equal(failed.error.code, 'JDK_PROBE_FAILED', '执行环境失败不能误报 JDK 版本不匹配');
+  assert.match(failed.error.message, /Win32 5/);
+  assert.ok(failed.error.candidates.every(item => item.probeError));
+  assert.equal(launchCount, 0, '探测失败时不能继续启动');
+  probeFailure = false;
   const results = await Promise.all([0, 1].map(() =>
     tools.get('spring_boot_start').execute({ dir, mode: 'direct-classpath', detach: true }, {})));
   const started = results.find(result => !result.isError);

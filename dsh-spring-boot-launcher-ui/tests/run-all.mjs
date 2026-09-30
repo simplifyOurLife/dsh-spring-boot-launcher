@@ -1,4 +1,5 @@
 await import("./ui-history-smoke.mjs");
+await import("./ui-plugin-details-smoke.mjs");
 await import("./ui-start-state-smoke.mjs");
 await import("./ui-desktop-connection-smoke.mjs");
 await import("./ui-log-scroll-smoke.mjs");

@@ -26,6 +26,8 @@ for (const required of [
   'package.json',
   'src/index.js',
   'cordis.patch.yml',
+  'locale/zh.json',
+  'locale/en.json',
   'dsh-spring-boot-launcher/src/index.js',
   'dsh-spring-boot-launcher-ui/lib/client.js',
   'README.md',

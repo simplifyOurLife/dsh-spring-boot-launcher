@@ -576,6 +576,7 @@ window.__ModuleLoader__.load({
 				".blv3-navbtn{background:var(--bg-card);color:var(--text-2);border:1px solid var(--line);border-radius:4px;font-size:10px;padding:2px 7px;cursor:pointer}",
 				".blv3-navbtn:hover{color:var(--text-1);background:var(--bg-hover)}",
 				".blv3-tailbtn{flex-shrink:0;white-space:nowrap;padding:4px 8px}",
+				".blv3-tailbtn.active{color:var(--ok);background:var(--ok-dim);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}",
 				".blv3-logview{flex:1;overflow-y:auto;background:var(--bg-inset);padding:12px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-all;margin:0}",
 				".blv3-logview .lv-ts{color:color-mix(in srgb,var(--text-2) 55%,transparent)}",
 				".blv3-logview .lv-info{color:color-mix(in srgb,var(--text-2) 70%,var(--accent));font-weight:600}",
@@ -1082,7 +1083,11 @@ window.__ModuleLoader__.load({
 				: b.status === "completed" || b.status === "killed" ? "已停止" : b.status || "";
 			return createElement("div", {
 				className: "blv3-svcrow" + (selected ? " selected" : ""),
-				onClick: function () { s.selectedKey = b.projectKey; s.emit(); },
+				onClick: function () {
+					if (!selected && props.onSelect) props.onSelect();
+					s.selectedKey = b.projectKey;
+					s.emit();
+				},
 			},
 				createElement("span", { className: "blv3-svcdot " + dotCls }),
 				createElement("div", { className: "blv3-svcmain" },
@@ -1131,6 +1136,8 @@ window.__ModuleLoader__.load({
 			var [search, setSearch] = useState("");
 			var [searchInput, setSearchInput] = useState("");
 			var [matchIdx, setMatchIdx] = useState(0);
+			var [followKey, setFollowKey] = useState(null);
+			var following = !!selKey && followKey === selKey;
 			var searchMatchCount = 0;
 			var logHtml = "";
 			(function buildLog() {
@@ -1178,6 +1185,7 @@ window.__ModuleLoader__.load({
 			// prev/next navigation: scroll the log pane to the current match
 			function gotoMatch(next) {
 				if (searchMatchCount === 0) return;
+				setFollowKey(null);
 				var target = (matchIdx + (next ? 1 : -1) + searchMatchCount) % searchMatchCount;
 				setMatchIdx(target);
 				// scroll after React commits: the data-m span for `target`
@@ -1194,6 +1202,10 @@ window.__ModuleLoader__.load({
 					if (el && el.scrollIntoView) el.scrollIntoView({ block: "center" });
 				}
 			}, [search]);
+			// 只在当前服务的新日志到来时跟随；状态刷新不应触发滚动。
+			useEffect(function () {
+				if (following && logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+			}, [selKey, rawLog, following]);
 
 			if (!panelOpen) { injectStyles(); return null; }
 			injectStyles();
@@ -1263,7 +1275,10 @@ window.__ModuleLoader__.load({
 										"暂无 — 在上方项目列表点 Start 启动。")
 									: createElement("div", { className: "blv3-svclist" },
 										keys.map(function (key) {
-											return createElement(ServiceRow, { key: key, service: s.services[key], selected: key === selKey });
+											return createElement(ServiceRow, {
+												key: key, service: s.services[key], selected: key === selKey,
+												onSelect: function () { setFollowKey(null); },
+											});
 										})),
 								s.lastError
 									? createElement("div", { className: "blv3-errorline", title: s.lastError }, s.lastError)
@@ -1297,9 +1312,12 @@ window.__ModuleLoader__.load({
 										className: "blv3-search",
 										value: searchInput,
 										placeholder: "检索日志 (Enter · Esc 清除)",
-										onChange: function (e) { setSearchInput(e.target.value); },
+										onChange: function (e) {
+											setSearchInput(e.target.value);
+											if (e.target.value.trim()) setFollowKey(null);
+										},
 										onKeyDown: function (e) {
-											if (e.key === "Enter") { setSearch(searchInput); setMatchIdx(0); }
+											if (e.key === "Enter") { setFollowKey(null); setSearch(searchInput); setMatchIdx(0); }
 											if (e.key === "Escape") { setSearchInput(""); setSearch(""); e.stopPropagation(); }
 										},
 									}),
@@ -1312,17 +1330,23 @@ window.__ModuleLoader__.load({
 											? createElement("span", { className: "blv3-matchnav" }, "0 处")
 											: null),
 								createElement("button", {
-									className: "blv3-navbtn blv3-tailbtn",
-									title: "滚动到日志末尾",
+									className: "blv3-navbtn blv3-tailbtn" + (following ? " active" : ""),
+									title: following ? "关闭自动跟随日志末尾" : "开启自动跟随日志末尾",
+									"aria-pressed": following,
 									disabled: !selKey,
 									onClick: function () {
-										// 只响应明确的用户操作，不与搜索定位或手动滚动争夺位置。
-										if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+										setFollowKey(following ? null : selKey);
+										if (!following && logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
 									},
 								}, "↓ 末尾")),
 							createElement("pre", {
 								ref: logRef,
 								className: "blv3-logview",
+								onScroll: function (e) {
+									if (!following) return;
+									var el = e.currentTarget;
+									if (el.scrollHeight - el.scrollTop - el.clientHeight > 24) setFollowKey(null);
+								},
 								dangerouslySetInnerHTML: { __html: logHtml.slice(-80000) },
 							}),
 							// status bar (v3): line count + buffer size + stream state + path
@@ -1339,6 +1363,40 @@ window.__ModuleLoader__.load({
 									: null)))));
 		}
 
+		// 详情页提供用途和使用入口，直接复用现有面板与进程状态。
+		function SpringBootPluginDetails() {
+			var labelStyle = { margin: "0 0 6px", fontWeight: 600, fontSize: "14px" };
+			var textStyle = { margin: 0, color: "var(--dsw-alias-label-secondary)", lineHeight: 1.7, fontSize: "13px" };
+			function section(title, text) {
+				return createElement("div", null,
+					createElement("h3", { style: labelStyle }, title),
+					createElement("p", { style: textStyle }, text));
+			}
+			return createElement("section", {
+				"aria-label": "Spring Boot 启动器详情",
+				style: {
+					border: "1px solid var(--dsw-alias-border-l3)", borderRadius: "12px",
+					padding: "20px", display: "flex", flexDirection: "column", gap: "18px",
+					color: "var(--dsw-alias-label-primary)",
+				},
+			},
+				createElement("h2", { style: { margin: 0, fontSize: "16px" } }, "Spring Boot 启动器"),
+				section("插件用途", "在 DSH 中发现、启动和管理 Maven Spring Boot 服务，Agent 工具与管理面板共享服务状态。"),
+				section("主要能力", "扫描工作区与 Maven 多模块项目，检查入口类、JDK 和启动条件；选择 Spring Profile，启动或停止服务，查询状态并查看实时日志。"),
+				section("使用方法", "打开服务管理面板，扫描工作区、选择项目和 Profile 后启动服务。也可以从侧栏的 Spring Boot 入口打开面板，或让 Agent 调用 spring_boot_* 工具。"),
+				section("环境要求", "需要与目标项目兼容的 JDK；需要构建时使用 Maven（mvn）。当前已在 Windows 11、PowerShell 7 和 Maven Spring Boot 项目中验证。Gradle 暂不支持，Linux 与 macOS 尚未验证。"),
+				section("日志与设置", "服务日志保存在项目的 logs/dsh-spring-boot-launcher.log。最近路径和默认 Profile 保存在当前浏览器中，具体启动选项在管理面板中选择。"),
+				createElement("button", {
+					type: "button",
+					onClick: function () { store.openPanel(); },
+					style: {
+						alignSelf: "flex-start", padding: "8px 14px", borderRadius: "8px",
+						border: "1px solid var(--dsw-alias-border-l3)", cursor: "pointer",
+						background: "var(--dsw-alias-bg-layer-1)", color: "inherit", font: "inherit",
+					},
+				}, "打开服务管理面板"));
+		}
+
 		// ─── Plugin registration ────────────────────────────────────────
 		// Three registrations: the sidebar footer entry (visible trigger), the
 		// shell.overlay panel, and a workspaces-fed wiring so the panel can
@@ -1348,6 +1406,14 @@ window.__ModuleLoader__.load({
 		// subscribe on mount + read on change.
 		var inject = ["slots", "workspaces"];
 		function apply(ctx) {
+			// 按 bundle 包名匹配详情页；旧宿主没有该插槽时继续等待，不影响侧栏入口。
+			ctx.slots.inject("plugins.bundle.config", () => ctx.slots.register({
+				name: "plugins.bundle.config",
+				key: "dsh-spring-boot-launcher",
+				inject: () => ({}),
+			}, function (props) {
+				return props && props.view === "summary" ? null : createElement(SpringBootPluginDetails);
+			}));
 			// Feed workspace paths into the store (live subscription).
 			try {
 				var wsList = ctx.workspaces && ctx.workspaces.list;

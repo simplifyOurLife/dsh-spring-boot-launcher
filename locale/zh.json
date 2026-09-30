@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Spring Boot 启动器",
+    "description": "在 DSH 中发现、启动和管理 Maven Spring Boot 服务，支持 Profile 选择、服务启停和实时日志。"
+  }
+}
