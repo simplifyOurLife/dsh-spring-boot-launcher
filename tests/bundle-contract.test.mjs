@@ -5,7 +5,7 @@ const root = new URL('../', import.meta.url);
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 
 assert.equal(pkg.name, 'dsh-spring-boot-launcher');
-assert.equal(pkg.version, '0.1.0');
+assert.equal(pkg.version, '0.1.1');
 assert.notEqual(pkg.private, true);
 assert.equal(pkg.main, './src/index.js');
 assert.equal(pkg.exports['.'], './src/index.js');

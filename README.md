@@ -15,7 +15,7 @@
 
 DSH Spring Boot Launcher 是面向 Maven Spring Boot 项目的专用启动器。它提供 Agent 工具和 Web 管理面板，用同一套进程管理逻辑完成项目检查、Profile 选择、启停、状态查询和日志查看。
 
-> 当前版本为 `0.1.0` / Alpha，支持从 GitHub 安装，尚未发布 npm 公共包，也不承诺稳定 API。真实项目启停和日志能力已在 Windows 11、PowerShell 7 环境验证。
+> 当前版本为 `0.1.1` / Alpha，支持从 GitHub 安装，尚未发布 npm 公共包，也不承诺稳定 API。真实项目启停和日志能力已在 Windows 11、PowerShell 7 环境验证；官方 DSH 桌面版的连接适配已加入，仍需真实工程端到端验收。
 
 ![Spring Boot Services 服务面板](docs/images/spring-boot-services-panel.png)
 

@@ -19,6 +19,12 @@ for (const headers of [
 assert.equal(requestRejection(req(), webServer, connection), 401);
 assert.equal(requestRejection(req({ cookie: 'fixture=valid' }), webServer, {}), 503);
 assert.equal(requestRejection(req({ cookie: 'fixture=valid', origin: 'http://127.0.0.1:3000' }), webServer, connection), undefined);
+assert.equal(requestRejection(req({ cookie: 'fixture=valid', origin: 'dsh-app://app', 'sec-fetch-site': 'cross-site' }), webServer, connection), undefined,
+  '桌面应用 Origin 可访问已认证回环通道');
+assert.equal(requestRejection(req({ origin: 'dsh-app://app', 'sec-fetch-site': 'cross-site' }), webServer, connection), 401,
+  '桌面应用 Origin 不得绕过登录态');
+assert.equal(requestRejection(req({ cookie: 'fixture=valid', origin: 'dsh-app://other', 'sec-fetch-site': 'cross-site' }), webServer, connection), 403,
+  '其他自定义协议来源仍被拒绝');
 const dispose = mountControlTransport({ webServer, connection,
   wss: { handleUpgrade() { upgraded++; } },
   handleRequest(request) { handled++; assert.equal(request.url, '/status'); },

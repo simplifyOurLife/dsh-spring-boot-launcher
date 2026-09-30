@@ -1,7 +1,7 @@
 export const CONTROL_PATH = '/spring-boot-launcher';
 
 // 不建立第二套身份系统：所有 HTTP/WS 请求必须通过 DSH 登录态检查。
-// 插件仍限定本机、同源和实际监听端口，不扩大宿主 trustedHosts 的范围。
+// 插件仍限定本机、实际监听端口及 Web 同源；桌面应用自定义协议另行精确识别。
 export function requestRejection(req, webServer, connection) {
   try {
     const host = String(req.headers.host || '');
@@ -9,8 +9,11 @@ export function requestRejection(req, webServer, connection) {
     if (!['127.0.0.1', 'localhost'].includes(url.hostname) || url.host !== host ||
         Number(url.port || 80) !== webServer.port || url.pathname !== '/' || url.search || url.hash) return 403;
     const origin = req.headers.origin;
-    if (origin && origin !== url.origin) return 403;
-    if (req.headers['sec-fetch-site'] === 'cross-site') return 403;
+    // 桌面渲染页使用 dsh-app://app，但 WebSocket 直连已认证的本机 Host。
+    // 只有该精确来源可越过浏览器的 cross-site 标记，登录态检查仍在下方执行。
+    const desktopOrigin = origin === 'dsh-app://app';
+    if (origin && origin !== url.origin && !desktopOrigin) return 403;
+    if (req.headers['sec-fetch-site'] === 'cross-site' && !desktopOrigin) return 403;
     // 宿主接口缺失或抛错时拒绝访问，绝不回退到无认证模式。
     if (typeof connection?.requestRejection !== 'function') return 503;
     return connection.requestRejection(req);
