@@ -9,6 +9,7 @@ process.env.DSH_HOME = join(tmpdir(), 'dsh-root-contract-' + randomUUID());
 try {
   await import('./bundle-contract.test.mjs');
   await import('./package-contents.test.mjs');
+  await import('./github-pages.test.mjs');
 } finally {
   if (previousDshHome === undefined) delete process.env.DSH_HOME;
   else process.env.DSH_HOME = previousDshHome;

@@ -9,7 +9,7 @@
 ![运行时：Spring Boot](https://img.shields.io/badge/runtime-Spring%20Boot-6DB33F?logo=springboot&logoColor=white)
 [![许可证：Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [功能](#功能) · [兼容性](#兼容性) · [安全边界](#安全边界) · [开发与测试](#开发与测试)
+[插件官网](https://simplifyourlife.github.io/dsh-spring-boot-launcher/) · [快速开始](#快速开始) · [功能](#功能) · [兼容性](#兼容性) · [安全边界](#安全边界) · [开发与测试](#开发与测试)
 
 </div>
 

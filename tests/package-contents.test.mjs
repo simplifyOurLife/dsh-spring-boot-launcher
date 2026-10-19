@@ -37,7 +37,7 @@ for (const required of [
   assert.ok(paths.has(required), `发行包缺少必要文件：${required}`);
 }
 
-for (const excludedPrefix of ['tests/', '.idea/', '.superpowers/', '.release-audit/']) {
+for (const excludedPrefix of ['tests/', 'docs/', '.idea/', '.superpowers/', '.release-audit/']) {
   assert.equal(
     [...paths].some((path) => path.startsWith(excludedPrefix)),
     false,

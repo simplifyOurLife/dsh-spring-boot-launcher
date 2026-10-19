@@ -19,3 +19,7 @@ Thumbs.db
 
 # 本地发布审查包含内部信息和完整文件清单，不公开。
 /.release-audit/
+
+# 官网浏览器验收生成的截图与会话，不进入源码和发行包。
+/.playwright-cli/
+/output/playwright/

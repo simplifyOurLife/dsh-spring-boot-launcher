@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DSH Spring Boot Launcher：Spring Boot（SpringBoot）专用启动器。在 DeepSeek Harness 中发现和管理本地 Maven 项目，选择 Profile、启停服务、搜索实时日志。">
+  <meta name="theme-color" content="#f7f8f3">
+  <meta property="og:title" content="DSH Spring Boot Launcher · 把服务启动，留在工作流里">
+  <meta property="og:description" content="面向 Maven Spring Boot 项目的 DSH 开源插件。项目发现、Profile 选择、服务启停与日志，一处完成。">
+  <meta property="og:type" content="website">
+  <title>DSH Spring Boot Launcher — SpringBoot 专用启动器</title>
+  <link rel="icon" href="mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">跳到正文</a>
+  <header class="header wrap">
+    <a class="brand" href="#main" aria-label="Spring Boot Launcher 首页"><img src="mark.svg" width="32" height="32" alt=""><span>Spring Boot <strong>Launcher</strong></span></a>
+    <nav aria-label="主导航"><a href="#features">功能</a><a href="#install">安装</a><a href="#compatibility">兼容性</a><a class="nav-github" href="https://github.com/simplifyOurLife/dsh-spring-boot-launcher">GitHub <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot"></span> DEEPSEEK HARNESS 的开源插件</p>
+        <h1 id="hero-title">把服务启动，<br>留在<span class="green">工作流里。</span></h1>
+        <p class="hero-description">不必在终端、配置文件和日志窗口之间来回切换。<br class="desktop-break">在 DSH 里发现项目、选择 Profile，让 Spring Boot 跑起来。</p>
+        <div class="actions"><a class="button primary" href="#install">开始使用 <span aria-hidden="true">↗</span></a><a class="button secondary" href="https://github.com/simplifyOurLife/dsh-spring-boot-launcher">查看源码 <span aria-hidden="true">→</span></a></div>
+        <p class="hero-meta">Maven Spring Boot <span>·</span> Windows 已验证 <span>·</span> Apache-2.0</p>
+      </div>
+      <div class="flow-window" aria-label="启动流程示意，不是实时运行状态">
+        <div class="window-top"><span class="window-dots" aria-hidden="true">● ● ●</span><span>从项目到运行，只差一次选择</span><span class="demo-label">流程示意</span></div>
+        <div class="flow-content">
+          <div class="flow-line"><span class="step-index">01</span><div><span class="flow-label">发现你的项目</span><div class="project-name"><span aria-hidden="true">▱</span> my-spring-boot-app</div><span class="flow-muted">识别 Maven 工程与 Spring Boot 入口</span></div></div>
+          <div class="flow-line"><span class="step-index">02</span><div><span class="flow-label">选好运行环境</span><div class="profile-line"><span class="profile">dev <span aria-hidden="true">⌄</span></span><span class="flow-muted">Spring Profile</span></div></div></div>
+          <div class="flow-line last"><span class="step-index">03</span><div><span class="flow-label">启动，查看日志</span><div class="terminal-line"><span class="prompt">›</span> Started Application</div><span class="running"><span class="dot"></span> 服务启停与日志，一处管理</span></div></div>
+        </div>
+        <div class="window-bottom"><span>DSH × SPRING BOOT</span><span>你的项目，仍在本机。</span></div>
+      </div>
+    </section>
+    <div class="scope-strip"><div class="wrap"><span class="scope-label">专注一件事</span><p>面向 <strong>Spring Boot（SpringBoot）</strong> 的本地开发体验，<br class="mobile-break">不做通用服务启动器。</p><span class="alpha">ALPHA · 持续迭代</span></div></div>
+    <section class="section wrap" id="features" aria-labelledby="features-title">
+      <div class="section-heading"><div><p class="eyebrow">一处管理，少些切换</p><h2 id="features-title">从发现项目，到读懂日志。</h2></div><p class="section-aside">Agent 工具和管理面板<br>共享同一套服务状态。</p></div>
+      <div class="features">
+        <article><span class="feature-number">01 / DISCOVER</span><h3>项目，不用一个个找</h3><p>扫描工作区里的 Maven Spring Boot 工程与多模块应用，检查入口、JDK 和构建产物。</p></article>
+        <article><span class="feature-number">02 / CONFIGURE</span><h3>切环境，选个 Profile</h3><p>识别 Spring Profile，在面板中选择运行环境。把不同工程的启动入口集中起来。</p></article>
+        <article><span class="feature-number">03 / RUN</span><h3>启动与停止，心里有数</h3><p>查看插件托管服务的运行状态。根据现有产物选择启动模式，不按占用端口盲目杀进程。</p></article>
+        <article><span class="feature-number">04 / READ</span><h3>读日志，不和滚动较劲</h3><p>检索、定位命中，也能开启末尾跟随。搜索、向上滚动或切换服务时，自动让出阅读位置。</p></article>
+      </div>
+    </section>
+    <section class="showcase wrap" aria-labelledby="panel-title">
+      <div class="showcase-heading"><div><p class="eyebrow">不是另一个终端窗口</p><h2 id="panel-title">你的 Spring Boot 工作台。</h2></div><span class="caption-tag">管理面板 · 界面示例</span></div>
+      <a class="screenshot" href="images/spring-boot-services-panel.png" aria-label="查看服务管理面板原图"><img src="images/spring-boot-services-panel.png" alt="Spring Boot Services 面板：工作区项目、Profile 下拉选择、服务启停、运行状态和日志区域" loading="lazy" width="1391" height="639"></a>
+      <p class="image-note">复用 DSH 的认证通道，不额外开放独立控制端口。截图为界面示例，并非在线控制台。</p>
+    </section>
+    <section class="section install-section wrap" id="install" aria-labelledby="install-title">
+      <div class="install-intro"><p class="eyebrow">QUICK START</p><h2 id="install-title">下一次启动，<br>试试在 DSH 里。</h2><p>已安装 DSH CLI？<br>在终端运行右侧命令，然后完整重启 DSH。</p><a class="text-link" href="https://awesome-dsh-plugin.com/p/simplifyOurLife/dsh-spring-boot-launcher/">在插件市场查看 <span aria-hidden="true">↗</span></a></div>
+      <div class="install-guide">
+        <div class="install-terminal"><div class="install-top"><span>终端 / PowerShell</span><button type="button" id="copy-command" aria-describedby="copy-status">复制命令</button></div><pre><code id="install-command" tabindex="0">dsh plugin --profile web add github:simplifyOurLife/dsh-spring-boot-launcher</code></pre></div>
+        <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
+        <ol class="install-steps"><li><strong>安装插件</strong><span>安装源为 GitHub。若宿主提示构建授权，请确认信任来源后按提示操作。</span></li><li><strong>完整重启 DSH</strong><span>Web 端重启 Host 服务；桌面端退出并重开应用。只刷新页面不够。</span></li><li><strong>打开 Spring Boot 面板</strong><span>扫描工作区，选择工程和 Profile，再点 Start。更新插件后同样需要重启。</span></li></ol>
+      </div>
+    </section>
+    <section class="compatibility" id="compatibility" aria-labelledby="compatibility-title"><div class="wrap compatibility-layout">
+      <div><p class="eyebrow">把边界也说清楚</p><h2 id="compatibility-title">专用，所以不贪多。</h2><p class="compatibility-intro">当前为 Alpha 阶段。支持什么、尚未验证什么，<br class="desktop-break">都应该在安装之前看得见。</p><a class="text-link" href="https://github.com/simplifyOurLife/dsh-spring-boot-launcher#兼容性">阅读完整兼容性说明 <span aria-hidden="true">↗</span></a></div>
+      <dl class="support-list"><div><dt>Windows 11 + PowerShell 7</dt><dd class="supported">已验证</dd></div><div><dt>Maven + Spring Boot / 多模块</dt><dd class="supported">已验证</dd></div><div><dt>DSH 桌面端</dt><dd>接口已适配，真实工程端到端待验收</dd></div><div><dt>Linux / macOS</dt><dd>尚未验证</dd></div><div><dt>Gradle / 其他服务类型</dt><dd>当前不支持</dd></div></dl>
+    </div><div class="wrap"><p class="safety"><strong>只运行你信任的工程。</strong> 插件通过宿主以当前用户权限执行 Maven 与 JVM，不是安全沙箱。应用日志可能包含敏感信息，分享前请脱敏。<a href="https://github.com/simplifyOurLife/dsh-spring-boot-launcher/blob/main/SECURITY.md">安全说明 ↗</a></p></div></section>
+  </main>
+  <footer class="footer wrap"><div><a class="brand" href="#main"><img src="mark.svg" width="28" height="28" alt=""><span>Spring Boot <strong>Launcher</strong></span></a><p>一个小工具，让本地开发顺手一点。</p></div><nav aria-label="项目链接"><a href="https://github.com/simplifyOurLife/dsh-spring-boot-launcher/releases">版本记录</a><a href="https://github.com/simplifyOurLife/dsh-spring-boot-launcher/issues">问题反馈</a><a href="https://github.com/simplifyOurLife/dsh-spring-boot-launcher/blob/main/LICENSE">Apache-2.0</a></nav></footer>
+</body>
+</html>
